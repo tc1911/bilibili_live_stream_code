@@ -245,6 +245,12 @@ if __name__ == '__main__':
         window.show()
         time.sleep(0.1)
         window.restore()
+        # [Fix] 隐藏窗口(hide)恢复时主动激活窗口，避免 Linux Qt 下无法重新显示
+        try:
+            if hasattr(window, 'activate'):
+                window.activate()
+        except Exception:
+            pass
         # 通知前端恢复轮询等操作
         try:
             api.window_service.send_to_frontend("onAppShown", None)
@@ -316,12 +322,8 @@ if __name__ == '__main__':
                 print(f"Error reading config: {e}")
 
             if min_to_tray and tray_state.get('tray_active', False):
-                # 最小化到托盘
-                if sys.platform == 'win32':
-                    window.hide()
-                else:
-                    # [Fix] Linux Qt backend: hide() 可能导致窗口无法恢复，用 minimize 代替
-                    window.minimize()
+                # 最小化到托盘: 隐藏窗口(不保留任务栏图标)
+                window.hide()
                 # [Fix] 异步通知前端暂停轮询，不能同步调用 evaluate_js，否则在 UI 线程死锁
                 threading.Thread(
                     target=lambda: api.window_service.send_to_frontend("onAppHidden", None),

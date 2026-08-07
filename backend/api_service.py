@@ -86,10 +86,7 @@ class ApiService:
         if self.config_manager.data.get("min_to_tray", True):
             self.config_manager.save()
             self.window_service.send_to_frontend("onAppHidden", None)
-            if sys.platform == 'win32':
-                self.window_service.window_hide()
-            else:
-                self.window_service.window_min()
+            self.window_service.window_hide()
             return True
 
         # 只有在直播状态下才尝试停止直播
