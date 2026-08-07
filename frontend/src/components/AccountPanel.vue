@@ -90,28 +90,28 @@ const getProgress = () => {
 
 <style scoped>
 .empty-state { display: flex; flex-direction: column; align-items: center; padding: 40px; }
-.hint { color: #666; margin-bottom: 20px; }
+.hint { color: var(--text-sub); margin-bottom: 20px; }
 
 .user-dashboard { padding: 30px; }
 .header-section { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
-.avatar-lg { width: 80px; height: 80px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.avatar-lg { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--card-bg); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 .main-info { display: flex; flex-direction: column; gap: 4px; }
 .name-row { display: flex; align-items: center; gap: 8px; }
-.name { font-size: 20px; font-weight: bold; color: #333; }
+.name { font-size: 20px; font-weight: bold; color: var(--text-main); }
 .level-tag { background: #FB7299; color: white; font-size: 12px; padding: 1px 6px; border-radius: 4px; }
-.uid { color: #999; font-size: 13px; }
+.uid { color: var(--text-sub); font-size: 13px; }
 
-.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 30px; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 20px 0; }
+.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 30px; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 20px 0; }
 .stat-item { text-align: center; }
-.stat-item .val { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 4px; }
-.stat-item .label { font-size: 12px; color: #999; }
+.stat-item .val { font-size: 18px; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
+.stat-item .label { font-size: 12px; color: var(--text-sub); }
 .text-blue { color: #23ADE5 !important; }
 .text-orange { color: #FFB027 !important; }
 
-.exp-section { background: #F9F9F9; padding: 16px; border-radius: 12px; }
-.exp-text { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 8px; }
-.progress-bar { height: 8px; background: #E0E0E0; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+.exp-section { background: var(--surface-color); padding: 16px; border-radius: 12px; }
+.exp-text { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sub); margin-bottom: 8px; }
+.progress-bar { height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
 .fill { height: 100%; background: #FB7299; transition: width 0.5s ease; }
-.tips { font-size: 12px; color: #999; text-align: right; }
+.tips { font-size: 12px; color: var(--text-sub); text-align: right; }
 .highlight { color: #FB7299; font-weight: bold; }
 </style>

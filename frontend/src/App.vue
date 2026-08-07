@@ -11,6 +11,7 @@ import RtmpPanel from '@/components/RtmpPanel.vue';
 import MessageModal from '@/components/MessageModal.vue';
 import UserAccountModal from '@/components/UserAccountModal.vue';
 import WindowControls from '@/components/WindowControls.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
 
 const { loadSavedConfig, getWindowPosition, windowDrag, refreshCurrentUser, syncRoomProfile } = useBridge();
 const activeTab = ref('account');
@@ -203,7 +204,10 @@ const handleSidebarAccountClick = () => {
       @pointerup="handlePointerUp"
     >
       <div class="app-title">B站直播工具</div>
-      <WindowControls />
+      <div class="drag-bar-right">
+        <ThemeToggle />
+        <WindowControls />
+      </div>
     </div>
 
     <div class="app-layout">
@@ -273,8 +277,14 @@ const handleSidebarAccountClick = () => {
 }
 
 .app-title {
-  font-size: 12px; margin-left: 12px; color: #666; font-weight: 500;
+  font-size: 12px; margin-left: 12px; color: var(--text-sub); font-weight: 500;
   pointer-events: none;
+}
+
+.drag-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* 主布局 */
@@ -283,20 +293,20 @@ const handleSidebarAccountClick = () => {
 
 /* 原有样式保持不变 */
 .loading-screen { height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-color); color: var(--text-sub); }
-.spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+.spinner { width: 40px; height: 40px; border: 4px solid var(--border-color); border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* 托盘人脸认证弹窗 */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.tray-verify-modal { width: 340px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
-.tray-verify-header { padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+.tray-verify-modal { width: 340px; background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.15); color: var(--text-main); }
+.tray-verify-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
 .tray-verify-header h3 { margin: 0; font-size: 16px; color: var(--text-main); }
-.tray-close-btn { background: none; border: none; font-size: 24px; color: #999; cursor: pointer; line-height: 1; }
-.tray-close-btn:hover { color: #333; }
-.tray-qr-container { padding: 30px; background: #f8f9fa; position: relative; display: flex; justify-content: center; }
-.tray-qr-box { background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.tray-close-btn { background: none; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer; line-height: 1; }
+.tray-close-btn:hover { color: var(--text-main); }
+.tray-qr-container { padding: 30px; background: var(--surface-color); position: relative; display: flex; justify-content: center; }
+.tray-qr-box { background: var(--card-bg); padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
 .tray-qr-box img { display: block; }
-.tray-qr-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #999; }
-.tray-verify-tip { padding: 0 20px; margin: 20px 0; font-size: 14px; color: #444; text-align: center; }
+.tray-qr-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-sub); }
+.tray-verify-tip { padding: 0 20px; margin: 20px 0; font-size: 14px; color: var(--text-sub); text-align: center; }
 .tray-verify-done { width: calc(100% - 40px); margin: 0 20px 20px 20px; height: 44px; }
 </style>

@@ -50,7 +50,7 @@ watch(() => state.logs.length, () => {
     </div>
 
     <div class="logs" ref="logsContainer">
-      <div v-if="state.logs.length === 0" style="padding: 10px; color: #666;">暂无日志...</div>
+      <div v-if="state.logs.length === 0" class="empty-logs">暂无日志...</div>
       <div v-for="(l,i) in state.logs" :key="i" class="log-item">{{ l }}</div>
     </div>
   </div>
@@ -106,7 +106,7 @@ watch(() => state.logs.length, () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: var(--disabled-bg);
   transition: .4s;
   border-radius: 20px;
 }
@@ -151,5 +151,9 @@ input:checked + .slider:before {
 .log-item:hover {
   background: rgba(255,255,255,0.05);
   border-left-color: #81C995;
+}
+.empty-logs {
+  padding: 10px;
+  color: var(--text-sub);
 }
 </style>

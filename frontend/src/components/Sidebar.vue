@@ -90,13 +90,13 @@ onMounted(async () => {
   transition: 0.2s;
   flex-shrink: 0;
 }
-.item:hover { background: rgba(0,0,0,0.05); }
-.item.active { background: #D3E3FD; color: #041E49; font-weight: 600; }
+.item:hover { background: var(--hover-bg); }
+.item.active { background: var(--item-active-bg); color: var(--item-active-color); font-weight: 600; }
 
 .user-card {
   /* margin-top: auto;  <-- nav 既然已经 flex:1 了，这里就不强制 auto 了，保留一点底部边距即可 */
   padding: 10px;
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -110,18 +110,18 @@ onMounted(async () => {
 .user-card.disabled { cursor: default; opacity: 0.7; }
 .user-card.disabled:hover { transform: none; box-shadow: none; }
 
-.avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
-.avatar-placeholder { width: 40px; height: 40px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; font-weight: bold; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+.avatar-placeholder { width: 40px; height: 40px; border-radius: 50%; background: var(--surface-color); display: flex; align-items: center; justify-content: center; color: var(--text-sub); font-weight: bold; }
 
 .info { flex: 1; overflow: hidden; }
 .name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.lv { font-size: 12px; color: #888; }
-.indicator { color: #aaa; font-size: 16px; }
+.lv { font-size: 12px; color: var(--text-sub); }
+.indicator { color: var(--text-sub); font-size: 16px; }
 
 .version-tag {
   text-align: center;
   font-size: 11px;
-  color: #bbb;
+  color: var(--text-sub);
   margin-top: 8px;
   flex-shrink: 0;
 }

@@ -40,7 +40,7 @@ const handleMax = async () => {
   width: 46px; height: 32px;
   background: transparent; border: none;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: #555;
+  cursor: pointer; color: var(--text-sub);
   transition: background 0.2s;
   /* [修复] 明确按钮本身不可拖拽，这是最关键的修复 */
   -webkit-app-region: no-drag;

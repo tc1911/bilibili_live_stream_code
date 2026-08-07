@@ -250,7 +250,7 @@ const subPartitions = computed(() => {
 
 .config-card {
   padding: 24px;
-  border: 1px solid #e0e3e7;
+  border: 1px solid var(--border-color);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
@@ -294,7 +294,7 @@ const subPartitions = computed(() => {
   font-family: "PingFang SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23444746' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239AA0A6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 32px;
@@ -383,7 +383,7 @@ const subPartitions = computed(() => {
 
 .modal-header {
   padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -398,19 +398,19 @@ const subPartitions = computed(() => {
   background: none;
   border: none;
   font-size: 24px;
-  color: #999;
+  color: var(--text-sub);
   cursor: pointer;
   line-height: 1;
 }
 
 .qr-container {
   padding: 30px;
-  background: #f8f9fa;
+  background: var(--surface-color);
   position: relative;
 }
 
 .qr-box {
-  background: white;
+  background: var(--card-bg);
   padding: 12px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
@@ -421,7 +421,7 @@ const subPartitions = computed(() => {
   padding: 0 20px;
   margin: 20px 0;
   font-size: 14px;
-  color: #444;
+  color: var(--text-sub);
 }
 
 .full-width {

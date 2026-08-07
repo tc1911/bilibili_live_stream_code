@@ -101,20 +101,20 @@ const currentData = computed(() => {
 
     </div>
 
-    <div v-else class="card" style="text-align:center;color:#888;padding:40px;">
+    <div v-else class="card" style="text-align:center;color:var(--text-sub);padding:40px;">
       暂未开始直播
     </div>
   </div>
 </template>
 
 <style scoped>
-.highlight { background: #E8F0FE; border: none; padding: 0; overflow: hidden; }
+.highlight { background: var(--highlight-bg); border: none; padding: 0; overflow: hidden; }
 
 /* 选项卡样式 */
 .tabs {
   display: flex;
-  background: rgba(0,0,0,0.03);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  background: var(--hover-bg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .tab-item {
@@ -122,21 +122,21 @@ const currentData = computed(() => {
   text-align: center;
   padding: 12px 0;
   font-size: 13px;
-  color: #666;
+  color: var(--text-sub);
   cursor: pointer;
   transition: all 0.2s;
   border-bottom: 2px solid transparent;
 }
 
 .tab-item:hover {
-  background: rgba(0,0,0,0.02);
-  color: #333;
+  background: var(--hover-bg);
+  color: var(--text-main);
 }
 
 .tab-item.active {
-  color: #0B57D0;
+  color: var(--primary-text);
   font-weight: 600;
-  border-bottom-color: #0B57D0;
+  border-bottom-color: var(--primary-color);
 }
 
 /* 内容区域样式 */
@@ -146,13 +146,13 @@ const currentData = computed(() => {
 
 .field-group { margin-bottom: 16px; }
 .field-group:last-child { margin-bottom: 0; }
-.label { font-size: 12px; color: #555; margin-bottom: 6px; font-weight: 500; }
+.label { font-size: 12px; color: var(--text-sub); margin-bottom: 6px; font-weight: 500; }
 
 .input-row { display: flex; gap: 8px; align-items: center; position: relative; }
 .gemini-input.readonly {
-  background: white;
-  color: #555;
-  border: 1px solid #d0d7de;
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
   cursor: text;
   font-family: "Sarasa Mono SC", "Source Han Mono SC", "Noto Sans Mono CJK SC", "WenQuanYi Micro Hei Mono", monospace;
   flex: 1;
@@ -171,7 +171,7 @@ const currentData = computed(() => {
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  color: #888;
+  color: var(--text-sub);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,7 +180,7 @@ const currentData = computed(() => {
 }
 
 .eye-icon:hover {
-  color: #333;
+  color: var(--text-main);
 }
 
 .eye-icon.disabled {

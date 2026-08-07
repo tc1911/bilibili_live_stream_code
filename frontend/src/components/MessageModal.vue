@@ -23,12 +23,12 @@ defineEmits(['close']);
   display: flex; align-items: center; justify-content: center;
 }
 .modal {
-  background: white; padding: 24px; border-radius: 16px;
+  background: var(--card-bg); padding: 24px; border-radius: 16px;
   text-align: center; width: 300px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 .icon { font-size: 40px; margin-bottom: 10px; }
-.modal h3 { margin: 0 0 10px 0; font-size: 18px; color: #333; }
-.modal p { color: #666; margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
+.modal h3 { margin: 0 0 10px 0; font-size: 18px; color: var(--text-main); }
+.modal p { color: var(--text-sub); margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
 .btn-primary { width: 100%; justify-content: center; }
 </style>

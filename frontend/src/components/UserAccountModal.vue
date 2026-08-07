@@ -93,30 +93,30 @@ const onAddSuccess = (data) => {
 
 <style scoped>
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; display: flex; align-items: center; justify-content: center; }
-.modal { background: white; width: 360px; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-.header { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+.modal { background: var(--card-bg); width: 360px; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.2); color: var(--text-main); }
+.header { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
 .header h3 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 10px; }
-.close-btn, .back-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #999; }
-.back-btn:hover { color: #333; }
+.close-btn, .back-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-sub); }
+.back-btn:hover { color: var(--text-main); }
 
 .content-view { min-height: 300px; display: flex; flex-direction: column; }
 .qr-view { align-items: center; justify-content: center; padding: 20px; }
 
 .account-list { flex: 1; overflow-y: auto; padding: 8px; max-height: 300px; }
 .account-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-.account-item:hover { background: #f5f5f5; }
-.account-item.active { background: #E8F0FE; border: 1px solid #D3E3FD; }
+.account-item:hover { background: var(--hover-bg); }
+.account-item.active { background: var(--item-active-bg); border: 1px solid var(--item-active-border); }
 
-.avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
 .info { flex: 1; overflow: hidden; }
-.name { font-size: 14px; font-weight: 600; color: #333; }
-.uid { font-size: 12px; color: #999; }
+.name { font-size: 14px; font-weight: 600; color: var(--text-main); }
+.uid { font-size: 12px; color: var(--text-sub); }
 
 .actions { display: flex; align-items: center; gap: 8px; }
-.badge { font-size: 10px; background: #0B57D0; color: white; padding: 2px 6px; border-radius: 4px; }
+.badge { font-size: 10px; background: var(--primary-color); color: white; padding: 2px 6px; border-radius: 4px; }
 .delete { color: #D93025; font-size: 12px; }
-.delete:hover { background: #FFEBEB; }
+.delete:hover { background: var(--danger-hover-bg); }
 
-.footer { padding: 12px; border-top: 1px solid #eee; margin-top: auto; }
+.footer { padding: 12px; border-top: 1px solid var(--border-color); margin-top: auto; }
 .full { width: 100%; }
 </style>

@@ -96,7 +96,7 @@ onUnmounted(() => {
 .qr-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
 .qr-box {
   position: relative; width: 180px; height: 180px;
-  background: #f5f5f5; border-radius: 12px; overflow: hidden;
+  background: var(--surface-color); border-radius: 12px; overflow: hidden;
   margin-bottom: 16px;
 }
 .qr-box img { width: 100%; height: 100%; }
@@ -105,6 +105,6 @@ onUnmounted(() => {
   background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: white; font-weight: bold;
 }
-.status { color: #666; font-size: 14px; margin-bottom: 12px; }
+.status { color: var(--text-sub); font-size: 14px; margin-bottom: 12px; }
 .btn-sm { padding: 6px 12px; font-size: 12px; }
 </style>

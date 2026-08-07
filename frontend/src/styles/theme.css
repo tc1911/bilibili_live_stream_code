@@ -1,11 +1,43 @@
 :root {
+  color-scheme: light;
   --bg-color: #FFFFFF;
   --surface-color: #F0F4F9;
+  --card-bg: #FFFFFF;
+  --input-bg: #FFFFFF;
   --primary-color: #0B57D0;
+  --primary-text: #0B57D0;
   --text-main: #1F1F1F;
   --text-sub: #444746;
+  --border-color: #E0E0E0;
+  --hover-bg: rgba(0,0,0,0.05);
+  --disabled-bg: #ccc;
+  --item-active-bg: #D3E3FD;
+  --item-active-color: #041E49;
+  --item-active-border: #D3E3FD;
+  --highlight-bg: #E8F0FE;
+  --danger-hover-bg: #FFEBEB;
   --border-radius: 16px;
   --transition: all 0.2s ease;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-color: #1A1D21;
+  --surface-color: #24282E;
+  --card-bg: #2A2F36;
+  --input-bg: #333943;
+  --primary-color: #0B57D0;
+  --primary-text: #8AB4F8;
+  --text-main: #E8EAED;
+  --text-sub: #9AA0A6;
+  --border-color: #3C4043;
+  --hover-bg: rgba(255,255,255,0.06);
+  --disabled-bg: #555;
+  --item-active-bg: #2B3C5E;
+  --item-active-color: #D2E3FC;
+  --item-active-border: #4A6A9A;
+  --highlight-bg: #1E2B3D;
+  --danger-hover-bg: #3A2424;
 }
 
 body {
@@ -15,6 +47,7 @@ body {
   color: var(--text-main);
   overflow: hidden;
   user-select: none;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .gemini-input {
@@ -28,9 +61,13 @@ body {
   outline: none;
   transition: var(--transition);
   font-size: 14px;
+  color: var(--text-main);
+}
+.gemini-input::placeholder {
+  color: var(--text-sub);
 }
 .gemini-input:focus {
-  background: #FFF;
+  background: var(--input-bg);
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(11,87,208,0.1);
 }
@@ -47,14 +84,14 @@ body {
 }
 .btn-primary { background: var(--primary-color); color: white; }
 .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+.btn-primary:disabled { background: var(--disabled-bg); cursor: not-allowed; }
 
 .btn-secondary { background: var(--surface-color); color: var(--text-main); }
-.btn-secondary:hover { background: #E0E0E0; }
+.btn-secondary:hover { background: var(--hover-bg); }
 
 .card {
-  background: #FFF;
-  border: 1px solid #E0E0E0;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   padding: 24px;
   margin-bottom: 16px;
@@ -70,13 +107,14 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 .modal {
-  background: white; padding: 30px; border-radius: 16px;
+  background: var(--card-bg); padding: 30px; border-radius: 16px;
   text-align: center; width: 320px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  color: var(--text-main);
 }
 .qr-box {
   margin: 20px auto; width: 200px; height: 200px;
-  background: #f5f5f5; display: flex; align-items: center; justify-content: center;
+  background: var(--surface-color); display: flex; align-items: center; justify-content: center;
   border-radius: 8px; overflow: hidden;
 }
 .qr-box img { width: 100%; height: 100%; }
