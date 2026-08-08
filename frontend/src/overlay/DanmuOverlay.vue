@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useBridge } from '@/api/bridge';
 
 const {
@@ -40,6 +40,13 @@ const onListScroll = () => {
   const { scrollTop, scrollHeight, clientHeight } = listRef.value;
   autoScroll.value = scrollHeight - scrollTop - clientHeight < 50;
 };
+
+// 不透明度: 只调节面板背景的 alpha (文字保持清晰, 才是真正的"窗口半透明"效果)
+const panelBg = computed(() => {
+  const t = (opacity.value - 0.3) / 0.7; // 0..1
+  const alpha = 0.2 + t * 0.6;           // 0.2..0.8
+  return `rgba(18, 20, 24, ${alpha.toFixed(2)})`;
+});
 
 window.onDanmuMessage = (data) => addMessage(data);
 
@@ -120,7 +127,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="overlay-root" :style="{ opacity: opacity }">
+  <div class="overlay-root" :style="{ background: panelBg }">
     <!-- 拖拽栏 -->
     <div
       class="overlay-drag pywebview-drag-region"
@@ -188,14 +195,12 @@ onUnmounted(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: rgba(18, 20, 24, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
   color: #E8EAED;
   font-family: "PingFang SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(6px);
 }
 
 .overlay-drag {
