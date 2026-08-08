@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=BiliLiveTool
+Name[zh_CN]=B站直播工具
+GenericName=Live Streaming Tool
+Comment=Bilibili live streaming tool (RTMP/SRT stream key)
+Exec=BiliLiveTool
+Icon=bilibili-live-tool
+Terminal=false
+Categories=Network;AudioVideo;

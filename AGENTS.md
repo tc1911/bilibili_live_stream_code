@@ -35,4 +35,4 @@ Desktop app (B站直播工具): Python backend (pywebview window + Qt tray) + Vu
 
 ## Releases
 
-Push a `v*` tag on `master` to trigger `release.yml`: builds one-file PyInstaller binaries for Ubuntu 22.04 / macOS / Windows, auto-generates a DeepSeek changelog (requires `DEEPSEEK_API_KEY` secret), and creates the GitHub release. Manual packaging commands (with `--add-data` flags for `frontend/dist`, `VERSION`, icons, hidden imports) are in `README.md`.
+Push a `v*` tag on `master` to trigger `release.yml`: builds one-file PyInstaller binaries for Ubuntu 22.04 / macOS / Windows; Linux additionally packages `.deb` / `.rpm` / `.pkg.tar.zst` (shared assets in `packaging/linux/`), auto-generates a DeepSeek changelog (requires `DEEPSEEK_API_KEY` secret), and creates the GitHub release. Manual packaging commands (with `--add-data` flags for `frontend/dist`, `VERSION`, icons, hidden imports) are in `README.md`.
