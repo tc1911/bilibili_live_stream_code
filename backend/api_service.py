@@ -98,6 +98,20 @@ class ApiService:
     def get_window_position(self): return self.window_service.get_window_position()
     def window_drag(self, target_x, target_y): return self.window_service.window_drag(target_x, target_y)
 
+    def start_window_move(self):
+        """Linux 系统级窗口拖动 (Qt startSystemMove), Wayland 下 window.move 无效"""
+        try:
+            import webview
+            w = webview.windows[0]
+            native = getattr(w, 'native', None)
+            handle = native.windowHandle() if native and hasattr(native, 'windowHandle') else None
+            if handle and hasattr(handle, 'startSystemMove'):
+                handle.startSystemMove()
+                return {"code": 0}
+        except Exception as e:
+            logger.warning(f"start_window_move failed: {e}")
+        return {"code": -1, "msg": "native move unavailable"}
+
     # --- User Proxy Methods ---
     def load_saved_config(self): return self.user_service.load_saved_config()
     def refresh_current_user(self): return self.user_service.refresh_current_user()
@@ -154,12 +168,17 @@ class ApiService:
 
     # --- App Config Methods ---
     def get_app_config(self):
-        import sys
+        import sys, os
         # 使用实际托盘运行状态（由 main.py 设置）
         has_tray = getattr(self, 'tray_active', False)
         config = {
             "min_to_tray": self.config_manager.data.get("min_to_tray", True),
             "is_win32": sys.platform == 'win32',
+            "is_linux": sys.platform.startswith('linux'),
+            "is_wayland": (
+                os.environ.get("XDG_SESSION_TYPE", "").lower() == "wayland"
+                or bool(os.environ.get("WAYLAND_DISPLAY"))
+            ),
             "has_tray": has_tray
         }
         return {"code": 0, "data": config}

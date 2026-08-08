@@ -14,7 +14,7 @@ import WindowControls from '@/components/WindowControls.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { getCurrentTheme, setTheme } from '@/theme';
 
-const { loadSavedConfig, getWindowPosition, windowDrag, refreshCurrentUser, syncRoomProfile, getTheme } = useBridge();
+const { loadSavedConfig, getWindowPosition, windowDrag, startWindowMove, refreshCurrentUser, syncRoomProfile, getTheme, getAppConfig } = useBridge();
 const activeTab = ref('account');
 const isInitializing = ref(true);
 
@@ -79,9 +79,21 @@ const initialDragState = ref({
   mouseY: 0,
 });
 
+// Linux 使用系统级拖动 (startSystemMove), Wayland 下 window.move 无效
+const useNativeDrag = ref(false);
+
 const handlePointerDown = async (event) => {
-  // 只在拖拽栏的空白处生效
-  if (event.target.classList.contains('drag-bar')) {
+  // 拖拽栏上的交互控件不触发拖拽 (按钮等)
+  if (event.target.closest('.drag-bar')) {
+    if (event.target.closest('button')) return;
+
+    if (useNativeDrag.value) {
+      // Linux: 交给合成器处理窗口拖动
+      const res = await startWindowMove();
+      if (res && res.code === 0) return;
+      // 原生拖动不可用时回退到指针捕获方案
+    }
+
     const initialWindowPos = await getWindowPosition();
     if (initialWindowPos) {
       initialDragState.value = {
@@ -121,6 +133,12 @@ onMounted(async () => {
     const savedTheme = await getTheme();
     if (savedTheme === 'light' || savedTheme === 'dark') {
       if (getCurrentTheme() !== savedTheme) setTheme(savedTheme);
+    }
+
+    // Linux 使用系统级窗口拖动 (Wayland 兼容)
+    const appConfig = await getAppConfig();
+    if (appConfig && appConfig.is_linux) {
+      useNativeDrag.value = true;
     }
 
     const user = await loadSavedConfig();

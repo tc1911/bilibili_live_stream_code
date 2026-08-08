@@ -63,6 +63,10 @@ export const useBridge = () => {
     windowDrag(targetX, targetY) {
       callPy('window_drag', targetX, targetY);
     },
+    // Linux 系统级窗口拖动 (startSystemMove, 兼容 Wayland)
+    async startWindowMove() {
+      return await callPy('start_window_move');
+    },
 
     // 加载配置
     async loadSavedConfig() {
