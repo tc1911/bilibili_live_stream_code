@@ -104,18 +104,9 @@ class ApiService:
     def window_drag(self, target_x, target_y): return self.window_service.window_drag(target_x, target_y)
 
     def start_window_move(self):
-        """Linux 系统级窗口拖动 (Qt startSystemMove), Wayland 下 window.move 无效"""
-        try:
-            import webview
-            w = webview.windows[0]
-            native = getattr(w, 'native', None)
-            handle = native.windowHandle() if native and hasattr(native, 'windowHandle') else None
-            if handle and hasattr(handle, 'startSystemMove'):
-                handle.startSystemMove()
-                return {"code": 0}
-        except Exception as e:
-            logger.warning(f"start_window_move failed: {e}")
-        return {"code": -1, "msg": "native move unavailable"}
+        """主窗口系统级窗口拖动 (Wayland 下 window.move 无效, 委托主线程 startSystemMove)"""
+        window_registry.invoke_overlay_controller("main_start_move")
+        return {"code": 0}
 
     # --- User Proxy Methods ---
     def load_saved_config(self): return self.user_service.load_saved_config()

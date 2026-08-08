@@ -143,9 +143,11 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- 透明度滑条 -->
+    <!-- 不透明度滑条 -->
     <div class="opacity-row">
+      <span class="opacity-label">不透明度</span>
       <input type="range" min="0.3" max="1" step="0.01" :value="opacity" @input="onOpacityInput" class="opacity-slider" :disabled="isLocked">
+      <span class="opacity-value">{{ Math.round(opacity * 100) }}%</span>
     </div>
 
     <!-- 弹幕列表 -->
@@ -235,9 +237,25 @@ onUnmounted(() => {
   flex-shrink: 0;
   padding: 4px 12px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.opacity-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  flex-shrink: 0;
+}
+.opacity-value {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  width: 34px;
+  text-align: right;
+  flex-shrink: 0;
 }
 .opacity-slider {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 3px;
   accent-color: #8AB4F8;
   cursor: pointer;

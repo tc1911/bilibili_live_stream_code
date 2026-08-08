@@ -91,35 +91,53 @@ logger.info(f"Log file path: {log_file}")
 class OverlayWindowController(QObject):
     """弹幕悬浮窗的 Qt 原生操作控制器, 必须在 Qt 主线程执行
 
-    js_api 回调线程直接操作 QWidget (setWindowFlag / startSystemMove 等)
-    会导致 QtWebEngine 段错误, 因此统一经 QMetaObject 排队到主线程。
+    pywebview 的 js_api 方法在独立线程执行 (见 webview.util.js_bridge_call),
+    直接操作 QWidget (setWindowFlag / startSystemMove 等) 会导致 QtWebEngine
+    段错误或静默失效, 因此统一经 QMetaObject 排队到主线程。
+    window.native 是 BrowserView(QMainWindow, 顶层窗口), .webview 是其中的子控件。
     """
 
-    def __init__(self, overlay_window):
+    def __init__(self, main_window, overlay_window):
         super().__init__()
+        self._main = main_window
         self._overlay = overlay_window
         self._want_ontop = True
 
-    def _get_view(self):
-        native = getattr(self._overlay, 'native', None)
-        if native is None:
+    def _get_top(self, overlay=True):
+        """顶层窗口控件 (BrowserView/QMainWindow)"""
+        target = self._overlay if overlay else self._main
+        return getattr(target, 'native', None)
+
+    def _get_webview(self, overlay=True):
+        """QWebEngineView 子控件 (透明背景需要设在它上面)"""
+        top = self._get_top(overlay)
+        if top is None:
             return None
-        # pywebview 5.x 的 native 是 BrowserView 包装, 真实 QWebEngineView 在 .webview
-        if not hasattr(native, 'page') and hasattr(native, 'webview'):
-            return native.webview
-        return native
+        webview = getattr(top, 'webview', None)
+        return webview or top
+
+    @Slot()
+    def main_start_move(self):
+        """主窗口系统级拖动 (X11/Wayland 通用)"""
+        try:
+            top = self._get_top(overlay=False)
+            handle = top.windowHandle() if top and hasattr(top, 'windowHandle') else None
+            if handle and hasattr(handle, 'startSystemMove'):
+                handle.startSystemMove()
+        except Exception as e:
+            logger.warning(f"main start move failed: {e}")
 
     @Slot()
     def apply_translucent(self):
         """透明背景 (QtWebEngine 需要 page 背景透明)"""
-        view = self._get_view()
-        if view is None:
+        webview = self._get_webview()
+        if webview is None:
             return
         try:
             from qtpy.QtCore import Qt
             from qtpy.QtGui import QColor
-            view.setAttribute(Qt.WA_TranslucentBackground, True)
-            page = view.page() if hasattr(view, 'page') else None
+            webview.setAttribute(Qt.WA_TranslucentBackground, True)
+            page = webview.page() if hasattr(webview, 'page') else None
             if page is not None and hasattr(page, 'setBackgroundColor'):
                 page.setBackgroundColor(QColor(0, 0, 0, 0))
         except Exception as e:
@@ -128,22 +146,22 @@ class OverlayWindowController(QObject):
     @Slot()
     def apply_ontop(self):
         """应用置顶标志 (改标志后需要重新 show 才生效)"""
-        view = self._get_view()
-        if view is None:
+        top = self._get_top()
+        if top is None:
             return
         try:
             from qtpy.QtCore import Qt
-            view.setWindowFlag(Qt.WindowStaysOnTopHint, self._want_ontop)
-            view.show()
+            top.setWindowFlag(Qt.WindowStaysOnTopHint, self._want_ontop)
+            top.show()
         except Exception as e:
             logger.warning(f"overlay ontop failed: {e}")
 
     @Slot()
     def start_move(self):
-        """系统级窗口拖动 (X11/Wayland 通用)"""
+        """悬浮窗系统级窗口拖动 (X11/Wayland 通用, 用顶层窗口句柄)"""
         try:
-            view = self._get_view()
-            handle = view.windowHandle() if view and hasattr(view, 'windowHandle') else None
+            top = self._get_top()
+            handle = top.windowHandle() if top and hasattr(top, 'windowHandle') else None
             if handle and hasattr(handle, 'startSystemMove'):
                 handle.startSystemMove()
         except Exception as e:
@@ -605,12 +623,12 @@ if __name__ == '__main__':
             pass
         center_and_show_window(target)
 
-        # 初始化悬浮窗控制器 (驻留 Qt 主线程, 供 js_api 线程委托原生操作)
+        # 初始化窗口控制器 (驻留 Qt 主线程, 供 js_api 线程委托原生操作)
         try:
             from qtpy.QtWidgets import QApplication
             app = QApplication.instance()
             if app is not None:
-                controller = OverlayWindowController(overlay_window)
+                controller = OverlayWindowController(window, overlay_window)
                 controller.moveToThread(app.thread())
                 window_registry.overlay_controller = controller
                 print("Overlay controller initialized.")
