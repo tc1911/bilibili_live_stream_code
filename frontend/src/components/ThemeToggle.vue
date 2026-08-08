@@ -1,16 +1,30 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { useBridge } from '@/api/bridge';
 import { getCurrentTheme, setTheme } from '@/theme';
 
+const { setTheme: saveThemeBackend } = useBridge();
 const isDark = ref(false);
+let observer = null;
 
-const toggleTheme = () => {
+const toggleTheme = async () => {
   isDark.value = !isDark.value;
-  setTheme(isDark.value ? 'dark' : 'light');
+  const theme = isDark.value ? 'dark' : 'light';
+  setTheme(theme);
+  await saveThemeBackend(theme);
 };
 
 onMounted(() => {
   isDark.value = getCurrentTheme() === 'dark';
+  // 后端配置恢复主题时 (App.vue onMounted) 同步按钮状态
+  observer = new MutationObserver(() => {
+    isDark.value = document.documentElement.getAttribute('data-theme') === 'dark';
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+});
+
+onUnmounted(() => {
+  if (observer) observer.disconnect();
 });
 </script>
 

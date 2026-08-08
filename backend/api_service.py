@@ -171,6 +171,18 @@ class ApiService:
             return {"code": 0}
         return {"code": -1, "msg": "Unknown config key"}
 
+    # --- Theme Methods ---
+    def get_theme(self):
+        theme = self.config_manager.data.get("theme", "")
+        return {"code": 0, "theme": theme}
+
+    def set_theme(self, theme):
+        if theme not in ("light", "dark"):
+            return {"code": -1, "msg": "Unknown theme"}
+        self.config_manager.data["theme"] = theme
+        self.config_manager.save()
+        return {"code": 0}
+
     def get_version(self):
         """获取应用版本号"""
         import os, sys

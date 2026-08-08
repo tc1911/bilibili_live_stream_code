@@ -12,8 +12,9 @@ import MessageModal from '@/components/MessageModal.vue';
 import UserAccountModal from '@/components/UserAccountModal.vue';
 import WindowControls from '@/components/WindowControls.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import { getCurrentTheme, setTheme } from '@/theme';
 
-const { loadSavedConfig, getWindowPosition, windowDrag, refreshCurrentUser, syncRoomProfile } = useBridge();
+const { loadSavedConfig, getWindowPosition, windowDrag, refreshCurrentUser, syncRoomProfile, getTheme } = useBridge();
 const activeTab = ref('account');
 const isInitializing = ref(true);
 
@@ -116,6 +117,12 @@ const handlePointerUp = (event) => {
 
 onMounted(async () => {
   try {
+    // 从后端配置恢复主题 (持久化来源，覆盖本地快照/系统偏好)
+    const savedTheme = await getTheme();
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      if (getCurrentTheme() !== savedTheme) setTheme(savedTheme);
+    }
+
     const user = await loadSavedConfig();
     if (user && user.uid) {
       fillUserState(user);

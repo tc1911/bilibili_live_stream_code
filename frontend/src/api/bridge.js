@@ -212,6 +212,16 @@ export const useBridge = () => {
       return res.code === 0;
     },
 
+    // 主题设置 (持久化到后端配置)
+    async getTheme() {
+      const res = await callPy('get_theme');
+      return res.code === 0 ? res.theme : '';
+    },
+    async setTheme(theme) {
+      const res = await callPy('set_theme', theme);
+      return res.code === 0;
+    },
+
     // 版本号
     async getVersion() {
       const res = await callPy('get_version');
