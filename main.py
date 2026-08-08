@@ -265,6 +265,17 @@ if __name__ == '__main__':
     # 不能挂在 ApiService 上 (pywebview 会遍历 js_api 属性树), 存入注册表
     window_registry.overlay_window = overlay_window
 
+    # 悬浮窗被系统关闭 (Alt+F4 等) 时改为隐藏, 而不是销毁窗口
+    def on_overlay_closing():
+        try:
+            overlay_window.hide()
+            window_registry.overlay_visible = False
+        except Exception:
+            pass
+        return False  # 阻止真正关闭
+
+    overlay_window.events.closing += on_overlay_closing
+
     def center_and_show_window(window):
         primary_screen = webview.screens[0]
         if sys.platform == 'win32':

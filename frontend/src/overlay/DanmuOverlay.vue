@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useBridge } from '@/api/bridge';
 
 const {
@@ -8,7 +8,6 @@ const {
   toggleDanmuOverlay,
   getOverlayState,
   setOverlayAlwaysOnTop,
-  setOverlayOpacity,
   startOverlayMove,
   overlayGetPosition,
   overlayDrag,
@@ -19,7 +18,6 @@ const inputMsg = ref('');
 const isLinux = ref(false);
 const isLocked = ref(false);
 const isAlwaysOnTop = ref(true);
-const opacity = ref(0.92);
 const autoScroll = ref(true);
 const listRef = ref(null);
 
@@ -41,13 +39,6 @@ const onListScroll = () => {
   autoScroll.value = scrollHeight - scrollTop - clientHeight < 50;
 };
 
-// 不透明度: 只调节面板背景的 alpha (文字保持清晰, 才是真正的"窗口半透明"效果)
-const panelBg = computed(() => {
-  const t = (opacity.value - 0.3) / 0.7; // 0..1
-  const alpha = 0.2 + t * 0.6;           // 0.2..0.8
-  return `rgba(18, 20, 24, ${alpha.toFixed(2)})`;
-});
-
 window.onDanmuMessage = (data) => addMessage(data);
 
 const sendReply = async () => {
@@ -68,12 +59,6 @@ const toggleOnTop = async () => {
 
 const toggleLock = () => {
   isLocked.value = !isLocked.value;
-};
-
-const onOpacityInput = async (e) => {
-  const v = parseFloat(e.target.value);
-  opacity.value = v;
-  await setOverlayOpacity(v);
 };
 
 const closeOverlay = () => {
@@ -117,7 +102,6 @@ onMounted(async () => {
   const st = await getOverlayState();
   if (st && st.code === 0) {
     isAlwaysOnTop.value = st.always_on_top;
-    opacity.value = st.opacity;
   }
 });
 
@@ -127,7 +111,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="overlay-root" :style="{ background: panelBg }">
+  <div class="overlay-root">
     <!-- 拖拽栏 -->
     <div
       class="overlay-drag pywebview-drag-region"
@@ -148,13 +132,6 @@ onUnmounted(() => {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
         </button>
       </div>
-    </div>
-
-    <!-- 不透明度滑条 -->
-    <div class="opacity-row">
-      <span class="opacity-label">不透明度</span>
-      <input type="range" min="0.3" max="1" step="0.01" :value="opacity" @input="onOpacityInput" class="opacity-slider" :disabled="isLocked">
-      <span class="opacity-value">{{ Math.round(opacity * 100) }}%</span>
     </div>
 
     <!-- 弹幕列表 -->
@@ -195,6 +172,7 @@ onUnmounted(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background: rgba(18, 20, 24, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
@@ -237,34 +215,6 @@ onUnmounted(() => {
 }
 .ctl-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
 .ctl-btn.active { color: #8AB4F8; background: rgba(138,180,248,0.18); }
-
-.opacity-row {
-  flex-shrink: 0;
-  padding: 4px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.opacity-label {
-  font-size: 11px;
-  color: rgba(255,255,255,0.5);
-  flex-shrink: 0;
-}
-.opacity-value {
-  font-size: 11px;
-  color: rgba(255,255,255,0.6);
-  width: 34px;
-  text-align: right;
-  flex-shrink: 0;
-}
-.opacity-slider {
-  flex: 1;
-  min-width: 0;
-  height: 3px;
-  accent-color: #8AB4F8;
-  cursor: pointer;
-}
 
 .message-list {
   flex: 1;

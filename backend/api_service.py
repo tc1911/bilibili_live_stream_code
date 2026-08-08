@@ -77,7 +77,7 @@ class ApiService:
         self.window_service.send_to_frontend("onDanmuMessage", data)
         # 弹幕悬浮窗可见时同步推送
         overlay = window_registry.overlay_window
-        if overlay and getattr(overlay, 'visible', False):
+        if overlay and window_registry.overlay_visible:
             self.window_service.send_to_window(overlay, "onDanmuMessage", data)
 
     # def _on_backend_log(self, msg):
@@ -214,6 +214,7 @@ class ApiService:
         window_registry.invoke_overlay_controller("apply_ontop")
         # pywebview 的 Window.show 自带线程安全处理
         overlay.show()
+        window_registry.overlay_visible = True
         return {"code": 0}
 
     def hide_danmu_overlay(self):
@@ -223,13 +224,14 @@ class ApiService:
                 overlay.hide()
             except Exception:
                 pass
+        window_registry.overlay_visible = False
         return {"code": 0}
 
     def toggle_danmu_overlay(self):
         overlay = self._get_overlay()
         if not overlay:
             return {"code": -1, "msg": "悬浮窗未创建"}
-        if getattr(overlay, 'visible', False):
+        if window_registry.overlay_visible:
             self.hide_danmu_overlay()
             return {"code": 0, "visible": False}
         self.show_danmu_overlay()
@@ -239,7 +241,7 @@ class ApiService:
         overlay = self._get_overlay()
         return {
             "code": 0,
-            "visible": bool(overlay and getattr(overlay, 'visible', False)),
+            "visible": bool(overlay and window_registry.overlay_visible),
             "always_on_top": self.config_manager.data.get("overlay_ontop", True),
             "opacity": self.config_manager.data.get("overlay_opacity", 0.92),
         }

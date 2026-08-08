@@ -9,6 +9,7 @@ Qt 原生控件操作统一经 overlay_controller 委托到 Qt 主线程执行
 """
 
 overlay_window = None
+overlay_visible = False  # 悬浮窗可见性 (pywebview Window 没有 visible 属性, 自己维护)
 overlay_controller = None
 
 
