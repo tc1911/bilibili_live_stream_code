@@ -200,6 +200,29 @@ export const useBridge = () => {
       return await callPy('stop_danmu_monitor');
     },
 
+    // 弹幕悬浮窗
+    async toggleDanmuOverlay() {
+      return await callPy('toggle_danmu_overlay');
+    },
+    async getOverlayState() {
+      return await callPy('get_overlay_state');
+    },
+    async setOverlayAlwaysOnTop(on) {
+      return await callPy('set_overlay_always_on_top', on);
+    },
+    async setOverlayOpacity(opacity) {
+      return await callPy('set_overlay_opacity', opacity);
+    },
+    async overlayGetPosition() {
+      return await callPy('overlay_get_position');
+    },
+    overlayDrag(targetX, targetY) {
+      callPy('overlay_drag', targetX, targetY);
+    },
+    async startOverlayMove() {
+      return await callPy('overlay_start_move');
+    },
+
     // 发送弹幕
     async sendDanmu(msg) {
       const res = await callPy('send_danmu', msg);

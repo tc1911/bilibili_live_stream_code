@@ -74,6 +74,10 @@ class ApiService:
         # 注意：这里可能在子线程中被调用，webview 的 evaluate_js 应该是线程安全的
         # 前端挂载的函数名为 onDanmuMessage
         self.window_service.send_to_frontend("onDanmuMessage", data)
+        # 弹幕悬浮窗可见时同步推送
+        overlay = getattr(self, 'overlay_window', None)
+        if overlay and getattr(overlay, 'visible', False):
+            self.window_service.send_to_window(overlay, "onDanmuMessage", data)
 
     # def _on_backend_log(self, msg):
     #     """处理后端日志回调，推送到前端"""
@@ -201,6 +205,120 @@ class ApiService:
         self.config_manager.data["theme"] = theme
         self.config_manager.save()
         return {"code": 0}
+
+    # --- 弹幕悬浮窗 ---
+    def _get_overlay(self):
+        return getattr(self, 'overlay_window', None)
+
+    def _get_overlay_native(self):
+        overlay = self._get_overlay()
+        if not overlay:
+            return None
+        return getattr(overlay, 'native', None)
+
+    def _apply_overlay_translucent(self):
+        """设置悬浮窗透明背景 (QtWebEngine 需要 page 背景透明)"""
+        native = self._get_overlay_native()
+        if not native:
+            return
+        try:
+            from qtpy.QtCore import Qt
+            from qtpy.QtGui import QColor
+            native.setAttribute(Qt.WA_TranslucentBackground, True)
+            page = native.page()
+            if page and hasattr(page, 'setBackgroundColor'):
+                page.setBackgroundColor(QColor(0, 0, 0, 0))
+        except Exception as e:
+            logger.warning(f"overlay translucent failed: {e}")
+
+    def show_danmu_overlay(self):
+        overlay = self._get_overlay()
+        if not overlay:
+            return {"code": -1, "msg": "悬浮窗未创建"}
+        self._apply_overlay_translucent()
+        if self.config_manager.data.get("overlay_ontop", True):
+            self.set_overlay_always_on_top(True)
+        self.set_overlay_opacity(self.config_manager.data.get("overlay_opacity", 0.92))
+        overlay.show()
+        return {"code": 0}
+
+    def hide_danmu_overlay(self):
+        overlay = self._get_overlay()
+        if overlay:
+            try:
+                overlay.hide()
+            except Exception:
+                pass
+        return {"code": 0}
+
+    def toggle_danmu_overlay(self):
+        overlay = self._get_overlay()
+        if not overlay:
+            return {"code": -1, "msg": "悬浮窗未创建"}
+        if getattr(overlay, 'visible', False):
+            self.hide_danmu_overlay()
+            return {"code": 0, "visible": False}
+        self.show_danmu_overlay()
+        return {"code": 0, "visible": True}
+
+    def get_overlay_state(self):
+        overlay = self._get_overlay()
+        return {
+            "code": 0,
+            "visible": bool(overlay and getattr(overlay, 'visible', False)),
+            "always_on_top": self.config_manager.data.get("overlay_ontop", True),
+            "opacity": self.config_manager.data.get("overlay_opacity", 0.92),
+        }
+
+    def set_overlay_always_on_top(self, on):
+        native = self._get_overlay_native()
+        try:
+            from qtpy.QtCore import Qt
+            if native:
+                native.setWindowFlag(Qt.WindowStaysOnTopHint, bool(on))
+                native.show()
+        except Exception as e:
+            logger.warning(f"set overlay ontop failed: {e}")
+        self.config_manager.data["overlay_ontop"] = bool(on)
+        self.config_manager.save()
+        return {"code": 0, "always_on_top": bool(on)}
+
+    def set_overlay_opacity(self, opacity):
+        try:
+            opacity = max(0.3, min(1.0, float(opacity)))
+        except Exception:
+            opacity = 0.92
+        # 透明度由前端 CSS 实现 (各后端通用), 这里只负责持久化
+        self.config_manager.data["overlay_opacity"] = opacity
+        self.config_manager.save()
+        return {"code": 0, "opacity": opacity}
+
+    def overlay_get_position(self):
+        overlay = self._get_overlay()
+        if overlay:
+            return {"x": overlay.x, "y": overlay.y}
+        return {"x": 0, "y": 0}
+
+    def overlay_drag(self, target_x, target_y):
+        overlay = self._get_overlay()
+        if overlay:
+            try:
+                overlay.move(target_x, target_y)
+            except Exception:
+                pass
+        return {"code": 0}
+
+    def overlay_start_move(self):
+        """悬浮窗系统级拖动 (Wayland 下 move 无效)"""
+        try:
+            native = self._get_overlay_native()
+            handle = native.windowHandle() if native and hasattr(native, 'windowHandle') else None
+            if handle and hasattr(handle, 'startSystemMove'):
+                handle.startSystemMove()
+                return {"code": 0}
+        except Exception as e:
+            logger.warning(f"overlay start move failed: {e}")
+        return {"code": -1, "msg": "native move unavailable"}
 
     def get_version(self):
         """获取应用版本号"""

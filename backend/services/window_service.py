@@ -52,18 +52,22 @@ class WindowService:
         if window:
             window.move(target_x, target_y)
 
+    def send_to_window(self, window, function_name, data):
+        """发送数据到指定窗口"""
+        if not window:
+            return
+        # 使用 evaluate_js 调用前端挂载在 window 上的函数
+        # 注意数据需要序列化
+        import json
+        json_data = json.dumps(data)
+        # 这里的引号处理要小心
+        js_code = f"if(window.{function_name}) window.{function_name}({json_data})"
+        try:
+            window.evaluate_js(js_code)
+        except Exception:
+            # 忽略窗口关闭期间无法执行 JS 的错误 (如 ObjectDisposedException)
+            pass
+
     def send_to_frontend(self, function_name, data):
-        """发送数据到前端"""
-        window = self._get_window()
-        if window:
-            # 使用 evaluate_js 调用前端挂载在 window 上的函数
-            # 注意数据需要序列化
-            import json
-            json_data = json.dumps(data)
-            # 这里的引号处理要小心
-            js_code = f"if(window.{function_name}) window.{function_name}({json_data})"
-            try:
-                window.evaluate_js(js_code)
-            except Exception:
-                # 忽略窗口关闭期间无法执行 JS 的错误 (如 ObjectDisposedException)
-                pass
+        """发送数据到主窗口"""
+        self.send_to_window(self._get_window(), function_name, data)

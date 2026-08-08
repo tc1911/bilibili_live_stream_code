@@ -19,6 +19,7 @@ Desktop app (B站直播工具): Python backend (pywebview window + Qt tray) + Vu
 
 - Frontend → Python: methods on `ApiService` (`backend/api_service.py`) are exposed as `window.pywebview.api.<method>`. Every call goes through the single wrapper `frontend/src/api/bridge.js` — add new API methods to both places, returning `{"code": 0, ...}` / `{"code": -1, "msg": ...}`.
 - Python → frontend: `window_service.send_to_frontend("onXxx", data)` executes `window.onXxx` via `evaluate_js`. Handler names in use: `onBackendLog`, `onDanmuMessage`, `onAppShown`, `onAppHidden`, `onTrayLiveStarted`, `onTrayLiveStopped`, `onTrayNeedFaceVerify`, `onTrayLiveError`.
+- Two windows: main window + hidden danmu overlay (`frontend/overlay.html`, vite multi-entry build; second HTML/JS entry). Overlay window is created hidden in `main.py` and shown via `toggle_danmu_overlay`; danmu messages are pushed to it too (`window_service.send_to_window`). Overlay uses its own `OverlayApiProxy` js_api and Linux drag via `startSystemMove` (Wayland: `window.move` is a no-op).
 - `start_live` returns codes **60024/60043** = face verification required (frontend shows a QR); `switch_account`/`logout` must stop the danmu WS first (see `api_service.py`).
 - Live/danmu state lives in `backend/state.py` (`SessionState`), shared by services. All danmu WS work runs on a dedicated asyncio loop (`api_service.loop`), so other threads must submit via `asyncio.run_coroutine_threadsafe`.
 

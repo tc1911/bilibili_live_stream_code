@@ -86,10 +86,10 @@ logging.getLogger("urllib3").setLevel(logging.INFO)
 logger = logging.getLogger("Main")
 logger.info(f"Log file path: {log_file}")
 
-def get_html_path():
+def get_html_path(page='index.html'):
     if getattr(sys, 'frozen', False):
-        return os.path.join(sys._MEIPASS, 'frontend', 'dist', 'index.html')
-    return os.path.join(os.getcwd(), 'frontend', 'dist', 'index.html')
+        return os.path.join(sys._MEIPASS, 'frontend', 'dist', page)
+    return os.path.join(os.getcwd(), 'frontend', 'dist', page)
 
 # 启用高 DPI 感知，确保在高分辨率显示器上的正确缩放
 def _enable_windows_dpi_awareness():
@@ -151,6 +151,29 @@ if __name__ == '__main__':
         easy_drag=False, # 仅通过 pywebview-drag-region CSS 类标记拖拽区域
         hidden=True # [Fix] 先隐藏窗口, 等待页面加载完成后再显示, 避免启动白屏
     )
+    # --- 弹幕悬浮窗 (创建时隐藏, 由主窗口控制显示) ---
+    class OverlayApiProxy:
+        """悬浮窗专用 js_api 代理, 避免与主窗口共用同一 ApiService 实例的兼容性问题"""
+        def __init__(self, api):
+            self._api = api
+
+        def __getattr__(self, name):
+            if name.startswith('_'):
+                raise AttributeError(name)
+            return getattr(self._api, name)
+
+    overlay_window = webview.create_window(
+        '弹幕悬浮窗',
+        url=get_html_path('danmu-overlay.html'),
+        js_api=OverlayApiProxy(api),
+        width=380,
+        height=500,
+        frameless=True,
+        easy_drag=False,
+        hidden=True,
+    )
+    api.overlay_window = overlay_window
+
     def center_and_show_window(window):
         primary_screen = webview.screens[0]
         if sys.platform == 'win32':
@@ -529,4 +552,4 @@ if __name__ == '__main__':
     # [Fix] 强制 Linux 使用 Qt 后端，确保与 QSystemTrayIcon 兼容
     # Windows 保持默认 (Edge/CEF)
     gui_backend = 'qt' if sys.platform != 'win32' else None
-    webview.start(on_app_start, window, gui=gui_backend)
+    webview.start(on_app_start, window, overlay_window, gui=gui_backend)

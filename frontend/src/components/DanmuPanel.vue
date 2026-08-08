@@ -2,12 +2,18 @@
 import { ref, onActivated, nextTick } from 'vue';
 import { useBridge } from '@/api/bridge';
 
-const { startDanmuMonitor, sendDanmu } = useBridge();
+const { startDanmuMonitor, sendDanmu, toggleDanmuOverlay } = useBridge();
 const messages = ref([]);
 const messageListRef = ref(null);
 const isAutoScroll = ref(true);
 const inputMsg = ref('');
 const sending = ref(false);
+const overlayVisible = ref(false);
+
+const toggleOverlay = async () => {
+  const res = await toggleDanmuOverlay();
+  if (res && res.code === 0) overlayVisible.value = res.visible;
+};
 
 const addMessage = (data) => {
   messages.value.push(data);
@@ -88,6 +94,7 @@ onActivated(() => {
     <div class="danmu-header">
       <h3>弹幕监控</h3>
       <div class="controls">
+        <button class="overlay-btn" @click="toggleOverlay">{{ overlayVisible ? '收起悬浮窗' : '弹幕悬浮窗' }}</button>
         <label>
           <input type="checkbox" v-model="isAutoScroll"> 自动滚动
         </label>
@@ -187,10 +194,27 @@ onActivated(() => {
   font-size: 12px;
   color: var(--text-sub);
   user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 .controls input {
   vertical-align: middle;
   margin-top: -2px;
+}
+.overlay-btn {
+  background: var(--surface-color);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 3px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.overlay-btn:hover {
+  background: var(--hover-bg);
+  border-color: var(--primary-color);
 }
 
 .message-list {
