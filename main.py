@@ -39,6 +39,7 @@ import webview
 import logging
 from logging.handlers import RotatingFileHandler
 from backend.api_service import ApiService
+from backend import window_registry
 
 def get_log_xdg_base_path():
     """
@@ -175,7 +176,8 @@ if __name__ == '__main__':
         easy_drag=False,
         hidden=True,
     )
-    api.overlay_window = overlay_window
+    # 不能挂在 ApiService 上 (pywebview 会遍历 js_api 属性树), 存入注册表
+    window_registry.overlay_window = overlay_window
 
     def center_and_show_window(window):
         primary_screen = webview.screens[0]
@@ -523,7 +525,8 @@ if __name__ == '__main__':
         QMetaObject.invokeMethod(setup_obj, "run", Qt.QueuedConnection)
 
     # 定义启动回调：先显示窗口，再初始化 Linux 托盘
-    def on_app_start(window_obj=None):
+    def on_app_start(window_obj=None, *extra):
+        # [Fix] 多窗口时 pywebview 会把所有窗口作为参数传入, 这里只处理主窗口
         target = window_obj if window_obj is not None else window
         # [Fix] 等待前端页面加载完成再显示窗口, 避免 QtWebEngine 启动白屏
         # (首次启动需解压 onefile 并初始化渲染进程, 窗口过早显示会露出空白)

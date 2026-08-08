@@ -5,6 +5,7 @@ import sys
 from backend.bilibili_api import BilibiliApi
 from backend.config import Config
 from backend.state import SessionState
+from backend import window_registry
 from backend.services.window_service import WindowService
 from backend.services.user_service import UserService
 from backend.services.live_service import LiveService
@@ -75,7 +76,7 @@ class ApiService:
         # 前端挂载的函数名为 onDanmuMessage
         self.window_service.send_to_frontend("onDanmuMessage", data)
         # 弹幕悬浮窗可见时同步推送
-        overlay = getattr(self, 'overlay_window', None)
+        overlay = window_registry.overlay_window
         if overlay and getattr(overlay, 'visible', False):
             self.window_service.send_to_window(overlay, "onDanmuMessage", data)
 
@@ -208,7 +209,7 @@ class ApiService:
 
     # --- 弹幕悬浮窗 ---
     def _get_overlay(self):
-        return getattr(self, 'overlay_window', None)
+        return window_registry.overlay_window
 
     def _get_overlay_native(self):
         overlay = self._get_overlay()
