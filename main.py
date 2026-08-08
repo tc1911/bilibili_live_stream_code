@@ -147,14 +147,47 @@ class OverlayWindowController(QObject):
     def apply_ontop(self):
         """应用置顶标志 (改标志后需要重新 show 才生效)"""
         top = self._get_top()
-        if top is None:
-            return
+        if top is not None:
+            try:
+                from qtpy.QtCore import Qt
+                top.setWindowFlag(Qt.WindowStaysOnTopHint, self._want_ontop)
+                top.show()
+            except Exception as e:
+                logger.warning(f"overlay ontop failed: {e}")
+        # qtwayland 5.15 的 setWindowFlag 是 no-op (见 QWaylandShellSurface::setWindowFlags),
+        # KDE Wayland 下必须走 KWin 脚本设置 keepAbove
+        self._apply_kwin_keep_above(self._want_ontop)
+
+    def _apply_kwin_keep_above(self, on):
+        """KDE/KWin 下通过 D-Bus 加载 KWin 脚本设置窗口置顶"""
         try:
-            from qtpy.QtCore import Qt
-            top.setWindowFlag(Qt.WindowStaysOnTopHint, self._want_ontop)
-            top.show()
+            import subprocess
+            import time
+            pid = os.getpid()
+            code = (
+                "function setKA(){"
+                " var ws = workspace.windowList().filter(function(w){"
+                "   return w.pid === %d && w.caption.indexOf('弹幕悬浮窗') >= 0;"
+                " });"
+                " if (ws.length > 0){ ws[0].keepAbove = %s; }"
+                "}"
+                "setKA();"
+                "setTimeout(setKA, 1000);"
+            ) % (pid, 'true' if on else 'false')
+            script_id = "bili_ontop_%d_%d" % (pid, int(time.time() * 1000))
+            subprocess.run(
+                ["dbus-send", "--session", "--dest=org.kde.KWin", "--type=method_call",
+                 "/KWin", "org.kde.KWin.Scripting.loadScript",
+                 "string:" + code, "string:" + script_id],
+                capture_output=True, timeout=5,
+            )
+            subprocess.run(
+                ["dbus-send", "--session", "--dest=org.kde.KWin", "--type=method_call",
+                 "/KWin", "org.kde.KWin.Scripting.start", "string:" + script_id],
+                capture_output=True, timeout=5,
+            )
         except Exception as e:
-            logger.warning(f"overlay ontop failed: {e}")
+            logger.warning(f"kwin keep-above failed: {e}")
 
     @Slot()
     def start_move(self):
