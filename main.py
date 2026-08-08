@@ -162,6 +162,9 @@ if __name__ == '__main__':
                 raise AttributeError(name)
             return getattr(self._api, name)
 
+        def __dir__(self):
+            return dir(self._api)
+
     overlay_window = webview.create_window(
         '弹幕悬浮窗',
         url=get_html_path('danmu-overlay.html'),
@@ -552,4 +555,5 @@ if __name__ == '__main__':
     # [Fix] 强制 Linux 使用 Qt 后端，确保与 QSystemTrayIcon 兼容
     # Windows 保持默认 (Edge/CEF)
     gui_backend = 'qt' if sys.platform != 'win32' else None
-    webview.start(on_app_start, window, overlay_window, gui=gui_backend)
+    # 注意: 多窗口必须传窗口列表, 直接传多个 Window 对象会报 'Window' object is not iterable
+    webview.start(on_app_start, [window, overlay_window], gui=gui_backend)
