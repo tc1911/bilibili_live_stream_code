@@ -38,6 +38,7 @@ elif sys.platform == 'darwin':
 import webview
 import logging
 from logging.handlers import RotatingFileHandler
+from qtpy.QtCore import QObject, Slot
 from backend.api_service import ApiService
 from backend import window_registry
 
@@ -86,6 +87,73 @@ logging.getLogger("urllib3").setLevel(logging.INFO)
 
 logger = logging.getLogger("Main")
 logger.info(f"Log file path: {log_file}")
+
+class OverlayWindowController(QObject):
+    """弹幕悬浮窗的 Qt 原生操作控制器, 必须在 Qt 主线程执行
+
+    js_api 回调线程直接操作 QWidget (setWindowFlag / startSystemMove 等)
+    会导致 QtWebEngine 段错误, 因此统一经 QMetaObject 排队到主线程。
+    """
+
+    def __init__(self, overlay_window):
+        super().__init__()
+        self._overlay = overlay_window
+        self._want_ontop = True
+
+    def _get_view(self):
+        native = getattr(self._overlay, 'native', None)
+        if native is None:
+            return None
+        # pywebview 5.x 的 native 是 BrowserView 包装, 真实 QWebEngineView 在 .webview
+        if not hasattr(native, 'page') and hasattr(native, 'webview'):
+            return native.webview
+        return native
+
+    @Slot()
+    def apply_translucent(self):
+        """透明背景 (QtWebEngine 需要 page 背景透明)"""
+        view = self._get_view()
+        if view is None:
+            return
+        try:
+            from qtpy.QtCore import Qt
+            from qtpy.QtGui import QColor
+            view.setAttribute(Qt.WA_TranslucentBackground, True)
+            page = view.page() if hasattr(view, 'page') else None
+            if page is not None and hasattr(page, 'setBackgroundColor'):
+                page.setBackgroundColor(QColor(0, 0, 0, 0))
+        except Exception as e:
+            logger.warning(f"overlay translucent failed: {e}")
+
+    @Slot()
+    def apply_ontop(self):
+        """应用置顶标志 (改标志后需要重新 show 才生效)"""
+        view = self._get_view()
+        if view is None:
+            return
+        try:
+            from qtpy.QtCore import Qt
+            view.setWindowFlag(Qt.WindowStaysOnTopHint, self._want_ontop)
+            view.show()
+        except Exception as e:
+            logger.warning(f"overlay ontop failed: {e}")
+
+    @Slot()
+    def start_move(self):
+        """系统级窗口拖动 (X11/Wayland 通用)"""
+        try:
+            view = self._get_view()
+            handle = view.windowHandle() if view and hasattr(view, 'windowHandle') else None
+            if handle and hasattr(handle, 'startSystemMove'):
+                handle.startSystemMove()
+        except Exception as e:
+            logger.warning(f"overlay start move failed: {e}")
+
+    def set_ontop_state(self, on):
+        """跨线程调用: 记录状态并排队到主线程执行"""
+        self._want_ontop = bool(on)
+        from qtpy.QtCore import QMetaObject, Qt
+        QMetaObject.invokeMethod(self, "apply_ontop", Qt.QueuedConnection)
 
 def get_html_path(page='index.html'):
     if getattr(sys, 'frozen', False):
@@ -536,6 +604,20 @@ if __name__ == '__main__':
         except Exception:
             pass
         center_and_show_window(target)
+
+        # 初始化悬浮窗控制器 (驻留 Qt 主线程, 供 js_api 线程委托原生操作)
+        try:
+            from qtpy.QtWidgets import QApplication
+            app = QApplication.instance()
+            if app is not None:
+                controller = OverlayWindowController(overlay_window)
+                controller.moveToThread(app.thread())
+                window_registry.overlay_controller = controller
+                print("Overlay controller initialized.")
+            else:
+                print("QApplication not available, overlay controller disabled.")
+        except Exception as e:
+            print(f"Failed to init overlay controller: {e}")
 
         if sys.platform != 'win32':
              # 允许通过环境变量禁用托盘，方便排查崩溃问题

@@ -211,35 +211,17 @@ class ApiService:
     def _get_overlay(self):
         return window_registry.overlay_window
 
-    def _get_overlay_native(self):
-        overlay = self._get_overlay()
-        if not overlay:
-            return None
-        return getattr(overlay, 'native', None)
-
-    def _apply_overlay_translucent(self):
-        """设置悬浮窗透明背景 (QtWebEngine 需要 page 背景透明)"""
-        native = self._get_overlay_native()
-        if not native:
-            return
-        try:
-            from qtpy.QtCore import Qt
-            from qtpy.QtGui import QColor
-            native.setAttribute(Qt.WA_TranslucentBackground, True)
-            page = native.page()
-            if page and hasattr(page, 'setBackgroundColor'):
-                page.setBackgroundColor(QColor(0, 0, 0, 0))
-        except Exception as e:
-            logger.warning(f"overlay translucent failed: {e}")
-
     def show_danmu_overlay(self):
         overlay = self._get_overlay()
         if not overlay:
             return {"code": -1, "msg": "悬浮窗未创建"}
-        self._apply_overlay_translucent()
         if self.config_manager.data.get("overlay_ontop", True):
             self.set_overlay_always_on_top(True)
         self.set_overlay_opacity(self.config_manager.data.get("overlay_opacity", 0.92))
+        # Qt 原生操作委托到主线程执行
+        window_registry.invoke_overlay_controller("apply_translucent")
+        window_registry.invoke_overlay_controller("apply_ontop")
+        # pywebview 的 Window.show 自带线程安全处理
         overlay.show()
         return {"code": 0}
 
@@ -272,14 +254,8 @@ class ApiService:
         }
 
     def set_overlay_always_on_top(self, on):
-        native = self._get_overlay_native()
-        try:
-            from qtpy.QtCore import Qt
-            if native:
-                native.setWindowFlag(Qt.WindowStaysOnTopHint, bool(on))
-                native.show()
-        except Exception as e:
-            logger.warning(f"set overlay ontop failed: {e}")
+        # 委托到 Qt 主线程修改窗口标志, 避免 js_api 线程直接操作 QWidget 崩溃
+        window_registry.set_overlay_ontop(bool(on))
         self.config_manager.data["overlay_ontop"] = bool(on)
         self.config_manager.save()
         return {"code": 0, "always_on_top": bool(on)}
@@ -310,16 +286,9 @@ class ApiService:
         return {"code": 0}
 
     def overlay_start_move(self):
-        """悬浮窗系统级拖动 (Wayland 下 move 无效)"""
-        try:
-            native = self._get_overlay_native()
-            handle = native.windowHandle() if native and hasattr(native, 'windowHandle') else None
-            if handle and hasattr(handle, 'startSystemMove'):
-                handle.startSystemMove()
-                return {"code": 0}
-        except Exception as e:
-            logger.warning(f"overlay start move failed: {e}")
-        return {"code": -1, "msg": "native move unavailable"}
+        """悬浮窗系统级拖动 (Wayland 下 move 无效, 委托主线程执行 startSystemMove)"""
+        window_registry.invoke_overlay_controller("start_move")
+        return {"code": 0}
 
     def get_version(self):
         """获取应用版本号"""
