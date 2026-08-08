@@ -199,25 +199,25 @@ jobs:
     - name: Prepare Artifacts
       run: |
         VERSION="${{ github.ref_name }}"
-        VER="${VERSION#v}"
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           EXE_NAME="BiliLiveTool.exe"
           ASSET_NAME="BiliLiveTool-${VERSION}-${{ matrix.asset_name_suffix }}.zip"
           mv dist/$EXE_NAME .
           7z a $ASSET_NAME $EXE_NAME
-          echo "ASSET_FILES=$PWD/$ASSET_NAME" >> $GITHUB_ENV
+          # 注意: 用相对路径 (相对 GITHUB_WORKSPACE), Windows bash 的 $PWD 是 /d/a/... 会导致上传静默失败
+          echo "ASSET_FILES=$ASSET_NAME" >> $GITHUB_ENV
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
           APP_NAME="BiliLiveTool.app"
           ASSET_NAME="BiliLiveTool-${VERSION}-${{ matrix.asset_name_suffix }}.zip"
           7z a -r $ASSET_NAME dist/$APP_NAME
-          echo "ASSET_FILES=$PWD/$ASSET_NAME" >> $GITHUB_ENV
+          echo "ASSET_FILES=$ASSET_NAME" >> $GITHUB_ENV
         else # Linux: 构建 deb / rpm / pkg.tar.zst (逻辑在 packaging/linux/build-packages.sh)
           bash packaging/linux/build-packages.sh "$VERSION"
           {
             echo "ASSET_FILES<<EOF"
-            echo "$PWD/BiliLiveTool-${VERSION}-linux-amd64.deb"
-            echo "$PWD/BiliLiveTool-${VERSION}-linux-amd64.rpm"
-            echo "$PWD/bilibili-live-tool-${VER}-1-x86_64.pkg.tar.zst"
+            echo "BiliLiveTool-${VERSION}-linux-amd64.deb"
+            echo "BiliLiveTool-${VERSION}-linux-amd64.rpm"
+            echo "BiliLiveTool-${VERSION}-linux-x86_64.pkg.tar.zst"
             echo "EOF"
           } >> $GITHUB_ENV
         fi
@@ -341,7 +341,7 @@ jobs:
           - **Linux**: 提供三种安装包，任选其一：
             - **Debian/Ubuntu**: `sudo apt install ./BiliLiveTool-*-linux-amd64.deb`
             - **Fedora/RHEL**: `sudo dnf install BiliLiveTool-*-linux-amd64.rpm`
-            - **Arch Linux**: `sudo pacman -U bilibili-live-tool-*.pkg.tar.zst`
+            - **Arch Linux**: `sudo pacman -U BiliLiveTool-*-linux-x86_64.pkg.tar.zst`
 
           ### 🛡️ Windows 用户安全提示
           如果您在 Windows 上运行遇到 **"Windows 已保护你的电脑"** (SmartScreen) 蓝框提示：

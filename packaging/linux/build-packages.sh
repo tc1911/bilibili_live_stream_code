@@ -100,7 +100,7 @@ docker run --rm -v "$ROOT/archbuild:/build" archlinux:latest bash -euxo pipefail
   # --nodeps: 依赖是最终用户的运行依赖, 无需在精简构建容器内安装校验
   su builder -c "cd /build && makepkg -f --nodeps --noconfirm"
 '
-cp archbuild/bilibili-live-tool-${VER}-1-x86_64.pkg.tar.zst .
+cp archbuild/bilibili-live-tool-${VER}-1-x86_64.pkg.tar.zst "BiliLiveTool-${VERSION}-linux-x86_64.pkg.tar.zst"
 
 echo "== 构建完成 =="
-ls -lh "BiliLiveTool-${VERSION}-linux-amd64.deb" "BiliLiveTool-${VERSION}-linux-amd64.rpm" "bilibili-live-tool-${VER}-1-x86_64.pkg.tar.zst"
+ls -lh "BiliLiveTool-${VERSION}-linux-amd64.deb" "BiliLiveTool-${VERSION}-linux-amd64.rpm" "BiliLiveTool-${VERSION}-linux-x86_64.pkg.tar.zst"
