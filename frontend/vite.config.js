@@ -14,7 +14,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
-        overlay: path.resolve(__dirname, 'overlay.html')
+        // 注意: vite 的 HTML 输出文件名 = 源文件相对路径, 与 input key 无关,
+        // 因此悬浮窗页面必须叫 danmu-overlay.html 才能匹配 main.py 的加载路径
+        overlay: path.resolve(__dirname, 'danmu-overlay.html')
       }
     }
   }
