@@ -97,7 +97,8 @@ docker run --rm -v "$ROOT/archbuild:/build" archlinux:latest bash -euxo pipefail
   pacman -Syu --noconfirm --needed base-devel
   useradd -m builder
   chown -R builder:builder /build
-  su builder -c "cd /build && makepkg -f --noconfirm"
+  # --nodeps: 依赖是最终用户的运行依赖, 无需在精简构建容器内安装校验
+  su builder -c "cd /build && makepkg -f --nodeps --noconfirm"
 '
 cp archbuild/bilibili-live-tool-${VER}-1-x86_64.pkg.tar.zst .
 
