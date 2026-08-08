@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 export default defineConfig({
+  base: './', // [Fix] 相对路径, 兼容 pywebview 以 file:// 加载 dist/index.html
   plugins: [vue()],
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') }

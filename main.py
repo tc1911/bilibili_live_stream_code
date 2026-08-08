@@ -149,7 +149,7 @@ if __name__ == '__main__':
         height=window_height,
         frameless=True,
         easy_drag=False, # 仅通过 pywebview-drag-region CSS 类标记拖拽区域
-        # hidden=True
+        hidden=True # [Fix] 先隐藏窗口, 等待页面加载完成后再显示, 避免启动白屏
     )
     def center_and_show_window(window):
         primary_screen = webview.screens[0]
@@ -498,11 +498,16 @@ if __name__ == '__main__':
 
     # 定义启动回调：先显示窗口，再初始化 Linux 托盘
     def on_app_start(window_obj=None):
-        if window_obj:
-            center_and_show_window(window_obj)
-        else:
-            center_and_show_window(window) # Fallback to global if None passed
-            
+        target = window_obj if window_obj is not None else window
+        # [Fix] 等待前端页面加载完成再显示窗口, 避免 QtWebEngine 启动白屏
+        # (首次启动需解压 onefile 并初始化渲染进程, 窗口过早显示会露出空白)
+        try:
+            if hasattr(target, 'events') and hasattr(target.events, 'loaded'):
+                target.events.loaded.wait(timeout=30)
+        except Exception:
+            pass
+        center_and_show_window(target)
+
         if sys.platform != 'win32':
              # 允许通过环境变量禁用托盘，方便排查崩溃问题
             if os.environ.get("DISABLE_TRAY", "0") == "1":
